@@ -1,0 +1,36 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use Illuminate\Http\Request;
+
+class AuthController extends Controller
+{
+    public function register(Request $request)
+    {
+        $fields = $request->validate([
+            'name' => 'required|string|max:100',
+            'email' => 'required|string|unique:users,email',
+            'password' => 'required|string|confirmed|min:6',
+            'role_id' => 'required'
+        ]);
+
+        $user = User::create([
+            'name' => $fields['name'],
+            'email' => $fields['email'],
+            'password' => bcrypt($fields['password']),
+            'role_id' => $fields['role_id'],
+        ]);
+        
+        $token = $user->createToken('tokenku')->plainTextToken;
+
+        $response = [
+            'user' => $user,
+            'token' => $token
+        ];
+
+        return response($response, 201);
+
+    }
+}
